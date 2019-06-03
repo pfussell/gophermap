@@ -13,7 +13,11 @@ func main() {
 		fmt.Println("Error: ", err)
 	}
 
-	n, err := gn.Parse(fl)
+	prettyPrint(fl)
+}
+
+func prettyPrint(f []byte) {
+	n, err := gn.Parse(f)
 	if err != nil {
 		fmt.Println("Error: ", err)
 	}
@@ -29,5 +33,4 @@ func main() {
 
 		}
 	}
-
 }
