@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strconv"
 
 	gn "github.com/tomsteele/go-nmap"
 )
@@ -27,8 +28,8 @@ func NmapPrettyPrint(f []byte) {
 		for _, ip := range host.Addresses {
 
 			for _, port := range host.Ports {
-				fmt.Println(host.Hostnames[0].Name, " | ", ip.Addr, " | ", port.PortId, " | ", port.Service.Product, port.Service.Version)
-
+				// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Service.Product, port.Service.Version)
+				fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
 			}
 
 		}
@@ -37,9 +38,9 @@ func NmapPrettyPrint(f []byte) {
 
 // NessusPrettyPrint consumes an nessus csv and
 // prints out service and IP
-func NessusPrettyPrint() {
+func NessusPrettyPrint(fl string) {
 	// Open the file
-	csvfile, err := os.Open("test.csv")
+	csvfile, err := os.Open(fl)
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
 	}
@@ -59,7 +60,7 @@ func NessusPrettyPrint() {
 			log.Fatal(err)
 		}
 		if record[7] == "Service Detection" {
-			fmt.Printf("| %14s | %8s | \n", record[4], record[6])
+			fmt.Printf("| %14s | %8s | %22s\n", record[4], record[6], record[12])
 		}
 	}
 
@@ -77,28 +78,19 @@ func RumblePrettyPrint(f []byte) {
 		for _, ip := range host.Addresses {
 			fmt.Println("|--------------|-------------------|--------------|------------------|")
 			for _, port := range host.Ports {
-				if port.Service.Product == "" {
-					if len(port.Protocol) == 0 {
-						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", "UNKNOWN", " | ", " UNKNOWN ", " | ")
-					} else {
-						m := make(map[string]string)
-						b := []byte(port.Scripts[0].Output)
-						err := json.Unmarshal(b, &m)
-						if err != nil {
-							fmt.Println("Error parsing embedded JSON")
-						} else {
-							if banner, exists := m["banner"]; exists {
-								fmt.Println("*** FOUND BANNER ***")
-								fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
-							}
-						}
-					}
-					fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ")
+				if port.Service.Product != "" {
+					fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
 				} else {
-					if len(port.Protocol) == 0 {
-						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", " UNKNOWN ", " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
+					m := make(map[string]string)
+					b := []byte(port.Scripts[0].Output)
+					err := json.Unmarshal(b, &m)
+					if err != nil {
+						fmt.Println("Error parsing embedded JSON")
 					} else {
-						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
+						if banner, exists := m["banner"]; exists {
+							fmt.Printf("| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
+							// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
+						}
 					}
 				}
 			}
