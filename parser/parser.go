@@ -1,20 +1,21 @@
 package parser
 
 import (
-	"fmt"
-	"encoding/json"
-	gn "github.com/tomsteele/go-nmap"
 	"encoding/csv"
+	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"os"
+
+	gn "github.com/tomsteele/go-nmap"
 )
 
 // probably need to add files to be opened as arugments
-// to these functions 
+// to these functions
 
 // NmapPrettyPrint consumes nmap xml and prints
-// formatted table of enumed services 
+// formatted table of enumed services
 func NmapPrettyPrint(f []byte) {
 	n, err := gn.Parse(f)
 	if err != nil {
@@ -26,7 +27,7 @@ func NmapPrettyPrint(f []byte) {
 		for _, ip := range host.Addresses {
 
 			for _, port := range host.Ports {
-				fmt.Println(host.Hostnames[0].Name, " | ", ip.Addr, " | ", port.PortId)
+				fmt.Println(host.Hostnames[0].Name, " | ", ip.Addr, " | ", port.PortId, " | ", port.Service.Product, port.Service.Version)
 
 			}
 
@@ -34,8 +35,8 @@ func NmapPrettyPrint(f []byte) {
 	}
 }
 
-// NessusPrettyPrint consumes an nessus csv and 
-// prints out service and IP 
+// NessusPrettyPrint consumes an nessus csv and
+// prints out service and IP
 func NessusPrettyPrint() {
 	// Open the file
 	csvfile, err := os.Open("test.csv")
@@ -58,7 +59,7 @@ func NessusPrettyPrint() {
 			log.Fatal(err)
 		}
 		if record[7] == "Service Detection" {
-			fmt.Printf("IP: %s Port: %s\n", record[4], record[6])
+			fmt.Printf("| %14s | %8s | \n", record[4], record[6])
 		}
 	}
 
@@ -73,34 +74,34 @@ func RumblePrettyPrint(f []byte) {
 	}
 
 	for _, host := range n.Hosts {
-				for _, ip := range host.Addresses {
-					fmt.Println("|--------------|-------------------|--------------|------------------|")
-					for _, port := range host.Ports {
-						if port.Service.Product == "" {
-							if len(port.Protocol) == 0 {
-								fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", "UNKNOWN", " | ", " UNKNOWN ", " | ")
-							} else {
-								m := make(map[string]string)
-								b := []byte(port.Scripts[0].Output)
-								err := json.Unmarshal(b, &m)
-								if err != nil {
-									fmt.Println("Error parsing embedded JSON")
-								} else {
-									if banner, exists := m["banner"]; exists {
-										fmt.Println("*** FOUND BANNER ***")
-										fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
-									}
-								}
-							}
-							fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ")
+		for _, ip := range host.Addresses {
+			fmt.Println("|--------------|-------------------|--------------|------------------|")
+			for _, port := range host.Ports {
+				if port.Service.Product == "" {
+					if len(port.Protocol) == 0 {
+						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", "UNKNOWN", " | ", " UNKNOWN ", " | ")
+					} else {
+						m := make(map[string]string)
+						b := []byte(port.Scripts[0].Output)
+						err := json.Unmarshal(b, &m)
+						if err != nil {
+							fmt.Println("Error parsing embedded JSON")
 						} else {
-							if len(port.Protocol) == 0 {
-								fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", " UNKNOWN ", " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
-							} else {
-								fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
+							if banner, exists := m["banner"]; exists {
+								fmt.Println("*** FOUND BANNER ***")
+								fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
 							}
 						}
 					}
+					fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ")
+				} else {
+					if len(port.Protocol) == 0 {
+						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", " UNKNOWN ", " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
+					} else {
+						fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", port.Service.Product, port.Service.Version, " | ", port.Scripts[0].Output)
+					}
 				}
 			}
+		}
+	}
 }
