@@ -10,6 +10,9 @@ import (
 	"os"
 )
 
+// probably need to add files to be opened as arugments
+// to these functions 
+
 // NmapPrettyPrint consumes nmap xml and prints
 // formatted table of enumed services 
 func NmapPrettyPrint(f []byte) {
