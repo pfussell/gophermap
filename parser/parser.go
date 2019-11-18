@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
 
 	gn "github.com/tomsteele/go-nmap"
@@ -61,6 +62,39 @@ func NessusPrettyPrint(fl string) {
 		}
 		if record[7] == "Service Detection" {
 			fmt.Printf("| %14s | %8s | %22s\n", record[4], record[6], record[12])
+		}
+	}
+
+}
+
+// NessusPrettyWeb consumes an nessus csv and
+// prints out service and IP
+func NessusPrettyWeb(fl string) {
+	// Open the file
+	csvfile, err := os.Open(fl)
+	if err != nil {
+		log.Fatalln("Couldn't open the csv file", err)
+	}
+
+	// Parse the file
+	r := csv.NewReader(csvfile)
+	//r := csv.NewReader(bufio.NewReader(csvfile))
+
+	// Iterate through the records
+	for {
+		// Read each record from csv
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		if record[7] == "HTTP Server Type and Version" {
+			re := regexp.MustCompile("\\n")
+			input := record[12]
+			input = re.ReplaceAllString(input, " ")
+			fmt.Printf("| %14s | %8s | %22s\n", record[4], record[6], input)
 		}
 	}
 
