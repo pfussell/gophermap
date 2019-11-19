@@ -49,8 +49,8 @@ func NessusPrettyXML(f []byte) {
 	for _, host := range n.Report.ReportHosts {
 		for _, item := range host.ReportItems {
 			// change this...need to range over host properties to get tag == ip
-			if item.PluginName == "Service Detection" {
-				fmt.Printf("| %18s | %8s | %-22s |\n", host.Name, strconv.Itoa(item.Port), item.PluginOutput)
+			if item.PluginName == "Service Detection" && item.PluginOutput[0:17] != "The service close" {
+				fmt.Printf("| %18s | %8s | %-32s |\n", host.Name, strconv.Itoa(item.Port), item.PluginOutput[0:28])
 			}
 		}
 
