@@ -52,8 +52,13 @@ func main() {
 			os.Exit(1)
 		}
 
+		fl, err := ioutil.ReadFile(args[1])
+		if err != nil {
+			fmt.Println("Error opening file!")
+		}
+
 		// parse the csv
-		parser.NessusPrettyXML(args[1])
+		parser.NessusPrettyXML(fl)
 
 	case "nmap":
 		// check if file (2nd arg) exists; exit if not
