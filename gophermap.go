@@ -8,9 +8,16 @@ import (
 )
 
 func main() {
-	usage := `     
+	usage := `
+	For the moment gophermap will just take a scan file and output 
+	enumerated services in a format something like :
+	| host-ip | port | service version | 
+
 	.\gophermap [FILE-TYPE] [file.ext]
-	 file type can be [nessus, nmap, rumble]
+	 file type can be [nessus-csv, nessus-csv-web, nmap, rumble]
+		note that while rumble uses the nmap xml format it also seems to be hiding 
+		a lot of version data in banners in the JSON blob. Thus the dedicated
+		format. 
 	`
 
 	args := os.Args[1:]
@@ -21,14 +28,14 @@ func main() {
 
 	// gophermap currently accepts 3 scan file formats [nmapxml, rumblexml, nessus csv]
 	switch args[0] {
-	case "nessus":
+	case "nessus-csv":
 		// check if file (2nd arg) exists; exit if not
 		if _, err := os.Stat(args[1]); os.IsNotExist(err) {
 			fmt.Println("Scan file does not exist")
 			os.Exit(1)
 		}
 
-	case "nessus-web":
+	case "nessus-csv-web":
 		// check if file (2nd arg) exists; exit if not
 		if _, err := os.Stat(args[1]); os.IsNotExist(err) {
 			fmt.Println("Scan file does not exist")
@@ -37,6 +44,16 @@ func main() {
 
 		// parse the csv
 		parser.NessusPrettyWeb(args[1])
+
+	case "nessus-xml":
+		// check if file (2nd arg) exists; exit if not
+		if _, err := os.Stat(args[1]); os.IsNotExist(err) {
+			fmt.Println("Scan file does not exist")
+			os.Exit(1)
+		}
+
+		// parse the csv
+		parser.NessusPrettyXML(args[1])
 
 	case "nmap":
 		// check if file (2nd arg) exists; exit if not

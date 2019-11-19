@@ -10,11 +10,9 @@ import (
 	"regexp"
 	"strconv"
 
+	gne "github.com/tomsteele/go-nessus"
 	gn "github.com/tomsteele/go-nmap"
 )
-
-// probably need to add files to be opened as arugments
-// to these functions
 
 // NmapPrettyPrint consumes nmap xml and prints
 // formatted table of enumed services
@@ -24,16 +22,38 @@ func NmapPrettyPrint(f []byte) {
 		fmt.Println("Error: ", err)
 	}
 
+	// In my previous nmap parser I built a lot more logic into output options I would like to add next
+	// eg. ouput live hosts, output just a selected port
 	for _, host := range n.Hosts {
-
 		for _, ip := range host.Addresses {
-
 			for _, port := range host.Ports {
 				// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Service.Product, port.Service.Version)
 				fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
 			}
 
 		}
+	}
+}
+
+// NessusPrettyXML does a pretty print of nessus data
+// and takes in the .nessus style file
+func NessusPrettyXML(f []byte) {
+	n, err := gne.Parse(f)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	// we might need some better logic here. Right now we just look for the plugin named
+	// Service Detection and output the plugin output with the port. Might be other plugins
+	// we want to add that have good data.
+	for _, host := range n.Report.ReportHosts {
+		for _, item := range host.ReportItems {
+			// change this...need to range over host properties to get tag == ip
+			if item.PluginName == "Service Detection" {
+				fmt.Printf("| %18s | %8s | %-22s |\n", host.Name, strconv.Itoa(item.Port), item.PluginOutput)
+			}
+		}
+
 	}
 }
 
