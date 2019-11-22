@@ -58,7 +58,7 @@ func NessusPrettyServiceXML(f []byte) {
 }
 
 // NessusPrettyHighCritXML does a pretty print of nessus data
-// and takes in the .nessus style file
+// and takes in the .nessus style file; it prints all high and crit level findings
 func NessusPrettyHighCritXML(f []byte) {
 	n, err := gne.Parse(f)
 	if err != nil {
@@ -71,7 +71,7 @@ func NessusPrettyHighCritXML(f []byte) {
 	for _, host := range n.Report.ReportHosts {
 		for _, item := range host.ReportItems {
 			// change this...need to range over host properties to get tag == ip
-			if item.Severity == 2 || item.Severity == 3 || item.Severity == 4 {
+			if item.Severity == 3 || item.Severity == 4 {
 				fmt.Printf("| %18s | %8s | %-28s \n", host.Name, strconv.Itoa(item.Port), item.PluginName)
 			}
 		}
@@ -79,9 +79,9 @@ func NessusPrettyHighCritXML(f []byte) {
 	}
 }
 
-// NessusPrettyPrint consumes an nessus csv and
+// NessusPrettyServicesCSV consumes an nessus csv and
 // prints out service and IP
-func NessusPrettyPrint(fl string) {
+func NessusPrettyServicesCSV(fl string) {
 	// Open the file
 	csvfile, err := os.Open(fl)
 	if err != nil {
@@ -90,7 +90,6 @@ func NessusPrettyPrint(fl string) {
 
 	// Parse the file
 	r := csv.NewReader(csvfile)
-	//r := csv.NewReader(bufio.NewReader(csvfile))
 
 	// Iterate through the records
 	for {
@@ -109,10 +108,10 @@ func NessusPrettyPrint(fl string) {
 
 }
 
-// NessusPrettyWeb consumes an nessus csv and
+// NessusPrettyWebCSV consumes an nessus csv and
 // prints out service and IP
-func NessusPrettyWeb(fl string) {
-	// Open the file
+func NessusPrettyWebCSV(fl string) {
+
 	csvfile, err := os.Open(fl)
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
@@ -120,7 +119,6 @@ func NessusPrettyWeb(fl string) {
 
 	// Parse the file
 	r := csv.NewReader(csvfile)
-	//r := csv.NewReader(bufio.NewReader(csvfile))
 
 	// Iterate through the records
 	for {
@@ -153,24 +151,27 @@ func RumblePrettyPrint(f []byte) {
 	for _, host := range n.Hosts {
 		for _, ip := range host.Addresses {
 			fmt.Println("|--------------|-------------------|--------------|------------------|")
-			for _, port := range host.Ports {
-				if ip.Addr == "" {
-					continue
-				}
-				if port.Service.Product != "" {
-					fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
-				} else {
-					m := make(map[string]string)
-					b := []byte(port.Scripts[0].Output)
-					err := json.Unmarshal(b, &m)
-					if err != nil {
-						fmt.Println("Error parsing embedded JSON")
+			// im getting blank lines in the return and I can't figure out why
+			if ip.Addr == "" {
+				continue
+			} else {
+				for _, port := range host.Ports {
+					if port.Service.Product != "" {
+						fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
 					} else {
-						if banner, exists := m["banner"]; exists {
-							fmt.Printf("| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
-							// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
+						m := make(map[string]string)
+						b := []byte(port.Scripts[0].Output)
+						err := json.Unmarshal(b, &m)
+						if err != nil {
+							fmt.Println("Error parsing embedded JSON")
+						} else {
+							if banner, exists := m["banner"]; exists {
+								fmt.Printf("| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
+								// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
+							}
 						}
 					}
+
 				}
 			}
 		}
