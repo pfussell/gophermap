@@ -35,9 +35,9 @@ func NmapPrettyPrint(f []byte) {
 	}
 }
 
-// NessusPrettyXML does a pretty print of nessus data
+// NessusPrettyServiceXML does a pretty print of nessus data
 // and takes in the .nessus style file
-func NessusPrettyXML(f []byte) {
+func NessusPrettyServiceXML(f []byte) {
 	n, err := gne.Parse(f)
 	if err != nil {
 		fmt.Println("Error: ", err)
@@ -50,7 +50,29 @@ func NessusPrettyXML(f []byte) {
 		for _, item := range host.ReportItems {
 			// change this...need to range over host properties to get tag == ip
 			if item.PluginName == "Service Detection" && item.PluginOutput[0:17] != "The service close" {
-				fmt.Printf("| %18s | %8s | %-32s |\n", host.Name, strconv.Itoa(item.Port), item.PluginOutput[0:28])
+				fmt.Printf("| %18s | %8s | %-10s| %-32s |\n", host.Name, strconv.Itoa(item.Port), item.SvcName, item.PluginOutput[0:28])
+			}
+		}
+
+	}
+}
+
+// NessusPrettyHighCritXML does a pretty print of nessus data
+// and takes in the .nessus style file
+func NessusPrettyHighCritXML(f []byte) {
+	n, err := gne.Parse(f)
+	if err != nil {
+		fmt.Println("Error: ", err)
+	}
+
+	// we might need some better logic here. Right now we just look for the plugin named
+	// Service Detection and output the plugin output with the port. Might be other plugins
+	// we want to add that have good data.
+	for _, host := range n.Report.ReportHosts {
+		for _, item := range host.ReportItems {
+			// change this...need to range over host properties to get tag == ip
+			if item.Severity == 2 || item.Severity == 3 || item.Severity == 4 {
+				fmt.Printf("| %18s | %8s | %-28s \n", host.Name, strconv.Itoa(item.Port), item.PluginName)
 			}
 		}
 
@@ -132,6 +154,9 @@ func RumblePrettyPrint(f []byte) {
 		for _, ip := range host.Addresses {
 			fmt.Println("|--------------|-------------------|--------------|------------------|")
 			for _, port := range host.Ports {
+				if ip.Addr == "" {
+					continue
+				}
 				if port.Service.Product != "" {
 					fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
 				} else {

@@ -13,11 +13,22 @@ func main() {
 	enumerated services in a format something like :
 	| host-ip | port | service version | 
 
-	.\gophermap [FILE-TYPE] [file.ext]
-	 file type can be [nessus-csv, nessus-csv-web, nmap, rumble]
-		note that while rumble uses the nmap xml format it also seems to be hiding 
+
+	Usage: 
+	  .\gophermap [command] [file.ext]
+	  file type can be [nessus-csv, nessus-csv-web,nessus-xml-srv, nessus-xml-high, nmap, rumble]
+		note: that while rumble uses the nmap xml format it also seems to be hiding 
 		a lot of version data in banners in the JSON blob. Thus the dedicated
 		format. 
+
+		Commands:
+		gophermap
+		  nessus-csv          -- read the Nessus csv output and print out services found by the "Service Detection" plugin 
+		  nessus-csv-web      -- read the Nessus csv output and print out all detected web servers 
+		  nessus-xml          -- read the Nessus xml output and print out services found by the "Service Detection" plugin 
+		  nmap                -- read in an nmap xml file and print out all found services and versions by IP address
+		  rumble              -- read in a  rumble-nmap xml file and print out all found services and versions by IP address
+		  
 	`
 
 	args := os.Args[1:]
@@ -45,7 +56,7 @@ func main() {
 		// parse the csv
 		parser.NessusPrettyWeb(args[1])
 
-	case "nessus-xml":
+	case "nessus-xml-srv":
 		// check if file (2nd arg) exists; exit if not
 		if _, err := os.Stat(args[1]); os.IsNotExist(err) {
 			fmt.Println("Scan file does not exist")
@@ -58,7 +69,22 @@ func main() {
 		}
 
 		// parse the csv
-		parser.NessusPrettyXML(fl)
+		parser.NessusPrettyServiceXML(fl)
+
+	case "nessus-xml-high":
+		// check if file (2nd arg) exists; exit if not
+		if _, err := os.Stat(args[1]); os.IsNotExist(err) {
+			fmt.Println("Scan file does not exist")
+			os.Exit(1)
+		}
+
+		fl, err := ioutil.ReadFile(args[1])
+		if err != nil {
+			fmt.Println("Error opening file!")
+		}
+
+		// parse the csv
+		parser.NessusPrettyHighCritXML(fl)
 
 	case "nmap":
 		// check if file (2nd arg) exists; exit if not
@@ -91,9 +117,13 @@ func main() {
 		// parse file
 		parser.RumblePrettyPrint(fl)
 
+	case "help":
+		fmt.Println(usage)
+
 	default:
 		// report and exit if not of the 3 file types above
-		fmt.Println("Select  file type that exists")
+		fmt.Println("Error: Select  file type that exists")
+		fmt.Println(usage)
 		os.Exit(3)
 	}
 
