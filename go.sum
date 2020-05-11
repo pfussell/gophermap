@@ -1,0 +1,4 @@
+github.com/tomsteele/go-nessus v0.0.0-20150408213105-585a96dc1895 h1:DB7Z2Nk0cjVcXyNPtFxCYe0Ac5FSXEL3vtibDlLrThs=
+github.com/tomsteele/go-nessus v0.0.0-20150408213105-585a96dc1895/go.mod h1:p/6GcyHsX9FF+2Qla99kHI0OHEKHIPdgtFEH1VAakWg=
+github.com/tomsteele/go-nmap v0.0.0-20191202052157-3507e0b03523 h1:WqjohBOkUq6CIfZSDh7lTcJ0DVRewz9ynYwzcD0zLP8=
+github.com/tomsteele/go-nmap v0.0.0-20191202052157-3507e0b03523/go.mod h1:J5FsBj9uaXAn5G+CX8c9g+FkLwG2UAHqaxCGunmD1Hc=

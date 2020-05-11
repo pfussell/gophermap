@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"gophermap/parser"
 	"io/ioutil"
 	"os"
+
+	"github.com/pafussell/gophermap/parser"
 )
 
 // for csv files
