@@ -23,16 +23,11 @@ import (
 
 // nessusXmlCmd represents the nessusXml command
 var nessusXmlCmd = &cobra.Command{
-	Use:   "nessusXml",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "nessus-xml",
+	Short: "Read the Nessus xml output and print out services found by the \"Service Detection\" plugin",
+	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("nessusXml called")
+		fmt.Println("nessus-xml called")
 	},
 }
 

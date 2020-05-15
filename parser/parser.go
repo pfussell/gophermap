@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -13,6 +14,28 @@ import (
 	gne "github.com/tomsteele/go-nessus"
 	gn "github.com/tomsteele/go-nmap"
 )
+
+func checkfile(file string) {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		fmt.Println("Scan file does not exist")
+		os.Exit(1)
+	}
+}
+
+// for any function that takes in a byte slice
+func checkfileGetbyte(file string) []byte {
+	if _, err := os.Stat(file); os.IsNotExist(err) {
+		fmt.Println("Scan file does not exist")
+		os.Exit(1)
+	}
+
+	fl, err := ioutil.ReadFile(file)
+	if err != nil {
+		fmt.Println("Error opening file!")
+	}
+
+	return fl
+}
 
 // NmapPrettyPrint consumes nmap xml and prints
 // formatted table of enumed services
