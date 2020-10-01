@@ -154,24 +154,20 @@ func RumblePrettyPrint(f []byte) {
 			// im getting blank lines in the return and I can't figure out why
 			if ip.Addr == "" {
 				continue
-			} else {
-				for _, port := range host.Ports {
-					if port.Service.Product != "" {
-						fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
-					} else {
-						m := make(map[string]string)
-						b := []byte(port.Scripts[0].Output)
-						err := json.Unmarshal(b, &m)
-						if err != nil {
-							fmt.Println("Error parsing embedded JSON")
-						} else {
-							if banner, exists := m["banner"]; exists {
-								fmt.Printf("| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
-								// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
-							}
-						}
-					}
-
+			}
+			for _, port := range host.Ports {
+				if port.Service.Product != "" {
+					fmt.Printf("| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
+					continue
+				}
+				m := make(map[string]string)
+				b := []byte(port.Scripts[0].Output)
+				if err := json.Unmarshal(b, &m); err != nil {
+					fmt.Println("Error parsing embedded JSON")
+				}
+				if banner, exists := m["banner"]; exists {
+					fmt.Printf("| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
+					// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
 				}
 			}
 		}
