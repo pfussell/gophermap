@@ -8,7 +8,7 @@ import (
 )
 
 var nessusXmlCmd = &cobra.Command{
-	Use:   "nessus-xml",
+	Use:   "nessus-xml-srv",
 	Short: "Read the Nessus xml output and print out services found by the \"Service Detection\" plugin",
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {

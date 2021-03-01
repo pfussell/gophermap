@@ -77,7 +77,7 @@ func (p *Parser) getCsvRecords(w io.Writer) ([][]string, error) {
 func (p *Parser) NmapPrettyPrint() (err error) {
 	np, err := p.getNmapParser(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	// In my previous nmap parser I built a lot more logic into output options I would like to add next
@@ -100,7 +100,7 @@ func (p *Parser) NmapPrettyPrint() (err error) {
 func (p *Parser) NessusPrettyServiceXML() (err error) {
 	np, err := p.getNessusParser(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	// we might need some better logic here. Right now we just look for the plugin named
@@ -122,7 +122,7 @@ func (p *Parser) NessusPrettyServiceXML() (err error) {
 func (p *Parser) NessusPrettyHighCritXML() (err error) {
 	np, err := p.getNessusParser(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	// we might need some better logic here. Right now we just look for the plugin named
@@ -145,7 +145,7 @@ func (p *Parser) NessusPrettyHighCritXML() (err error) {
 func (p *Parser) NessusPrettyServicesCSV() (err error) {
 	records, err := p.getCsvRecords(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	for row := 0; row < len(records); row++ {
@@ -161,7 +161,7 @@ func (p *Parser) NessusPrettyServicesCSV() (err error) {
 func (p *Parser) NessusPrettyWebCSV() (err error) {
 	records, err := p.getCsvRecords(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	for row := 0; row < len(records); row++ {
@@ -180,7 +180,7 @@ func (p *Parser) NessusPrettyWebCSV() (err error) {
 func (p *Parser) RumblePrettyPrint() (err error) {
 	n, err := p.getNmapParser(p.Logger)
 	if err != nil {
-		return
+		return err
 	}
 
 	for _, host := range n.Hosts {
@@ -193,20 +193,16 @@ func (p *Parser) RumblePrettyPrint() (err error) {
 				for _, port := range host.Ports {
 					if port.Service.Product != "" {
 						fmt.Fprintf(p.Logger, "| %18s | %8s | %6s | %-22s %-8s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, port.Service.Product, port.Service.Version)
-					} else {
-						m := make(map[string]string)
-						b := []byte(port.Scripts[0].Output)
-						err := json.Unmarshal(b, &m)
-						if err != nil {
-							fmt.Println("Error parsing embedded JSON")
-						} else {
-							if banner, exists := m["banner"]; exists {
-								fmt.Fprintf(p.Logger, "| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
-								// fmt.Println("| ", ip.Addr, " | ", port.PortId, " | ", port.Protocol, " | ", " UNKNOWN ", " | ", banner)
-							}
-						}
+						continue
 					}
-
+					m := make(map[string]string)
+					b := []byte(port.Scripts[0].Output)
+					if err := json.Unmarshal(b, &m); err != nil {
+						fmt.Fprintf(p.Logger, "Error parsing embedded JSON\n")
+					}
+					if banner, exists := m["banner"]; exists {
+						fmt.Fprintf(p.Logger, "| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
+					}
 				}
 			}
 		}
