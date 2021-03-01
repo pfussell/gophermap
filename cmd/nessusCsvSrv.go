@@ -18,6 +18,7 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/pafussell/gophermap/parser"
 	"github.com/spf13/cobra"
 )
 
@@ -28,6 +29,8 @@ var nessusCsvSrvCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("nessus-csv-srv called")
+		p := parser.New(args[0], nil)
+		p.NessusPrettyServicesCSV()
 	},
 }
 
@@ -35,14 +38,5 @@ var filePath string
 
 func init() {
 	rootCmd.AddCommand(nessusCsvSrvCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// nessusCsvSrvCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	nessusCsvSrvCmd.Flags().StringVarP(&filePath, "PATH", "f", "", "Nessus CSV file to parse")
 }
