@@ -203,6 +203,7 @@ func (p *Parser) RumblePrettyPrint() (err error) {
 					if banner, exists := m["banner"]; exists {
 						fmt.Fprintf(p.Logger, "| %18s | %8s | %6s | %-22s |\n", ip.Addr, strconv.Itoa(port.PortId), port.Protocol, banner)
 					}
+
 				}
 			}
 		}
