@@ -14,7 +14,7 @@ var nmapCmd = &cobra.Command{
 	Long:  ``,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("nmap called, file = %v\n", args[0])
-		p := parser.New(args[0], nil)
+		p := parser.New(filePath, nil, Verbose)
 		p.NmapPrettyPrint()
 	},
 }
