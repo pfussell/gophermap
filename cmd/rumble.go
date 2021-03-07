@@ -14,7 +14,7 @@ var rumbleCmd = &cobra.Command{
 a lot of version data in banners in the JSON blob. Thus the dedicated format. `,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("rumble called")
-		p := parser.New(args[0], nil)
+		p := parser.New(filePath, nil, Verbose)
 		p.RumblePrettyPrint()
 	},
 }

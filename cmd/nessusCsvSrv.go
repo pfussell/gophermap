@@ -16,21 +16,20 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/pafussell/gophermap/parser"
 	"github.com/spf13/cobra"
 )
 
-// nessusCsvSrvCmd represents the nessusCsvSrv command
 var nessusCsvSrvCmd = &cobra.Command{
 	Use:   "nessus-csv-srv",
 	Short: "read the Nessus csv output and print out services found by the \"Service Detection\" plugin",
 	Long:  ``,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("nessus-csv-srv called")
-		p := parser.New(args[0], nil)
-		p.NessusPrettyServicesCSV()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		p := parser.New(filePath, nil, Verbose)
+		if err := p.NessusPrettyServicesCSV(); err != nil {
+			return err
+		}
+		return nil
 	},
 }
 
@@ -38,5 +37,4 @@ var filePath string
 
 func init() {
 	rootCmd.AddCommand(nessusCsvSrvCmd)
-	nessusCsvSrvCmd.Flags().StringVarP(&filePath, "PATH", "f", "", "Nessus CSV file to parse")
 }

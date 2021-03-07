@@ -7,7 +7,7 @@ import (
 
 func TestNmapPrettyPrintBadInputPath(t *testing.T) {
 	buffer := &bytes.Buffer{}
-	p := New("../test/testfiles/doesnotexist", buffer)
+	p := New("../test/testfiles/doesnotexist", buffer, false)
 	err := p.NmapPrettyPrint()
 
 	if err == nil {
